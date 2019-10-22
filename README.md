@@ -1,2 +1,2 @@
 # uncool
-MIGHT AS WELL FRIGGIN YEET
+maybe this will work
