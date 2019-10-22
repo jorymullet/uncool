@@ -2,7 +2,7 @@
 #### Prepare to be unimpressed.
 ---
 ## What is it
-**Uncool** is a Vue plugin that allows copy and images to be updated on the fly.
+Uncool is a Vue plugin that allows copy and images to be updated on the fly.
 ---
 ## Prereqs
 - Must be using Vue CLI
@@ -69,7 +69,7 @@ service cloud.firestore {
 }
 ```
 ## Add authorized editor:
-If you already know the User uid your would like to allow authority, skip to 2.
+If you already know the User uid you would like to authorize, skip to 2.
 
 1) Create user
   - Go to the authentication tab in the Firebase console of your project.
@@ -128,5 +128,8 @@ To acquire your Uncool editor authorization:
     - press `Cmd + u`.
     - press `logout`
     
+
+
+
 
 See, not that cool.
