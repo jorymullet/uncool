@@ -1,2 +1,2 @@
 # uncool
-Vue / Firebase CMS
+MIGHT AS WELL FRIGGIN YEET
