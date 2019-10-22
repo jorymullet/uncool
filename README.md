@@ -3,7 +3,6 @@
 ---
 ## What is it
 Uncool is a Vue plugin that allows copy and images to be updated on the fly.
----
 ## Prereqs
 - Must be using Vue CLI
 - Must have initialized a Firebase Project that includes the following:
