@@ -1,14 +1,33 @@
 import Vue from 'vue'
-import * as FIREBASE from 'firebase'
+import * as firebase from 'firebase'
 const eb = new Vue()
 const V_IDS = new Set()
 const UNCOOL_IDS = new Set()
+const TO_DO_LIST = {}
+let IS_AUTHORIZED = null
 
 let UNCOOL_REF
 let that
 
+const iterateOverToDoList = () => {
+  Object.keys(TO_DO_LIST).forEach(id => {
+    const uncoolEle = TO_DO_LIST[id]
+    uncoolCycle(uncoolEle.el, uncoolEle.binding, uncoolEle.vnode)
+  })
+}
+
+const startAuthListener = async () => {
+  firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
+      IS_AUTHORIZED = (await firebase.firestore().collection('uncool_users').doc(user.uid).get()).data()
+      return iterateOverToDoList()
+    }
+    IS_AUTHORIZED = false
+  })
+}
+
 /**
- * Actual plugin
+ * Starts the process for each ele
  */
 
 const uncoolCycle = async (el, binding, vnode) => {
@@ -50,7 +69,7 @@ const handleEditText = async (el, uncoolId) => {
 }
 
 /**
- * Handles loading text
+ * Handles loading image
  */
 
 const handleEditImage = async (el, uncoolId) => {
@@ -65,28 +84,53 @@ const handleEditImage = async (el, uncoolId) => {
 }
 
 
-export default {
-  install: function (Vue) {
-    that = new Vue()
-    Vue.prototype.$proOn = function (handle, func) {
-      eb.$on(handle, func)
-    }
-    Vue.prototype.$proEmit = function (handle, options) {
-      eb.$emit(handle, options)
-    }
-    // makes the Vue component globally available
-    UNCOOL_REF = FIREBASE.firestore().collection('uncool')
-
-    Vue.directive('uncool', {
-      bind: uncoolCycle,
-    })
-  },
-}
-
 
 /**
  * Handles whether user is authorized and styles Uncool elements accordingly
  */
+
+const determineEditableStyling = async (el, vnode, editMode, uncoolId) => {
+  if (!IS_AUTHORIZED) return
+
+  el.classList.add('uncool-ele') //marks the elements as editable
+
+  el.addEventListener('click', (event) => {
+    event.preventDefault()
+
+    const baseUncoolOptions = {
+      mode: editMode,
+      uncoolId,
+      fsRef: UNCOOL_REF.doc(uncoolId),
+    }
+    let editTypeOptions
+
+    if (editMode === 'edit-text') {
+      editTypeOptions = {
+        onSave: (newHtml) => {
+          el.innerHTML = newHtml
+        },
+        current: replaceSpecialHTMLChars(el.innerHTML),
+      }
+    } else if (editMode === 'edit-image') {
+      editTypeOptions = {
+        dimensions: {
+          height: el.offsetHeight,
+          width: el.offsetWidth,
+        },
+        onSave: (newUrl) => {
+          el.style.backgroundImage = `url(${newUrl})`
+        },
+      }
+    }
+
+    vnode.context.$proEmit('showUncoolAdmin', {
+      ...baseUncoolOptions,
+      ...editTypeOptions,
+    })
+  })
+}
+
+// readies text for editing
 
 const replaceSpecialHTMLChars = (text) => {
   let output = text
@@ -99,54 +143,6 @@ const replaceSpecialHTMLChars = (text) => {
     output = output.replace(new RegExp(regexString, 'g'), replacers[regexString])
   })
   return output
-}
-
-const determineEditableStyling = async (el, vnode, editMode, uncoolId) => {
-  const authUser = FIREBASE.auth().currentUser
-  let isUncoolEditor = false
-  if (authUser) {
-    isUncoolEditor = (await FIREBASE.firestore().collection('uncool_users').doc(authUser.uid).get()).data()
-  }
-
-
-  if (isUncoolEditor) {
-    el.classList.add('uncool-ele') //marks the elements as editable
-
-    el.addEventListener('click', (event) => {
-      event.preventDefault()
-
-      const baseUncoolOptions = {
-        mode: editMode,
-        uncoolId,
-        fsRef: UNCOOL_REF.doc(uncoolId),
-      }
-      let editTypeOptions
-
-      if (editMode === 'edit-text') {
-        editTypeOptions = {
-          onSave: (newHtml) => {
-            el.innerHTML = newHtml
-          },
-          current: replaceSpecialHTMLChars(el.innerHTML),
-        }
-      } else if (editMode === 'edit-image') {
-        editTypeOptions = {
-          dimensions: {
-            height: el.offsetHeight,
-            width: el.offsetWidth,
-          },
-          onSave: (newUrl) => {
-            el.style.backgroundImage = `url(${newUrl})`
-          },
-        }
-      }
-
-      vnode.context.$proEmit('showUncoolAdmin', {
-        ...baseUncoolOptions,
-        ...editTypeOptions,
-      })
-    })
-  }
 }
 
 /**
@@ -203,4 +199,32 @@ const verifyUncoolId = (el, binding) => {
   UNCOOL_IDS.add(uncoolId)
   V_IDS.add(vId)
   return uncoolId
+}
+
+/**
+ * The Spicy boy who initializes all of it
+ */
+
+export default {
+  install: function (Vue) {
+    that = new Vue()
+    Vue.prototype.$proOn = function (handle, func) {
+      eb.$on(handle, func)
+    }
+    Vue.prototype.$proEmit = function (handle, options) {
+      eb.$emit(handle, options)
+    }
+    // makes the Vue component globally available
+    UNCOOL_REF = firebase.firestore().collection('uncool')
+
+    Vue.directive('uncool', {
+      bind: (el, binding, vnode) => {
+        const vId = Object.keys(el.dataset)[0]
+        TO_DO_LIST[vId] = {el, binding, vnode}
+        uncoolCycle(el, binding, vnode)
+      },
+    })
+    iterateOverToDoList()
+    startAuthListener()
+  },
 }
