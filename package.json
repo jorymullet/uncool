@@ -12,6 +12,9 @@
     "CMS",
     "simple"
   ],
+  "scripts": {
+    "uncool": "npm version patch"
+  },
   "postcss": {
     "plugins": {
       "autoprefixer": {}
