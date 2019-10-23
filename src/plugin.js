@@ -50,9 +50,20 @@ const uncoolCycle = async (el, binding, vnode) => {
 
 const handleEditText = async (el, uncoolId) => {
   const previousHTML = el.innerHTML
+  const openSpan = '<span class="uncool-temp">'
+  const closeSpan = '</span>'
+  let tempReplace = previousHTML
 
-  // to show no words but just placeholding underscores
-  const tempReplace = previousHTML.replace(new RegExp('[a-zA-Z]', 'g'), '_')
+  const alreadyMadeTempHtml = previousHTML.indexOf(openSpan) !== -1
+  if (!alreadyMadeTempHtml) {
+    // to show no words but just placeholding underscores
+    tempReplace = previousHTML
+      .replace(new RegExp('[a-zA-Z]', 'g'), '_') //changes all letters to underscores
+      .replace(new RegExp(' ', 'g'), `${closeSpan} ${openSpan}`) //encases all spaces in close and open spans
+    tempReplace = openSpan + tempReplace + closeSpan
+  }
+
+
   el.innerHTML = tempReplace
 
   // in case we want to prevent duplication later on
