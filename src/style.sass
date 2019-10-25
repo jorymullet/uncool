@@ -1,14 +1,39 @@
 .uncool-ele
-  cursor: context-menu
-  position: relative
-  &:after
-    content: 'EDIT'
-    font-size: 10px
-    text-decoration: none
-    position: absolute
-    color: red
-    right: 0
-    transform: translateX(110%)
+  &.uncool-ele-text
+    outline: blue auto 3px
+    cursor: context-menu
+  &.uncool-ele-image
+    position: relative
+    cursor: pointer
+    &:after
+      $font-and-border: black
+      content: 'EDIT'
+      font-size: 15px
+      text-decoration: none
+      position: absolute
+      background-color: white
+      border: 1px solid $font-and-border
+      color: $font-and-border
+      //box-shadow: 0 0 5px 0 black
+      font-weight: bold
+      padding: 5px 60px
+      left: 50%
+      transform: translateX(-50%)
+      bottom: 30px
+      z-index: 989
+      font-family: monospace
+      opacity: 1
+    &:hover:after
+      opacity: .8
+
+
+@keyframes boxShadowPulse
+  0%
+    box-shadow: 0 0 0 0 white
+  50%
+    box-shadow: 0 0 10px 0 orange
+  100%
+    box-shadow: 0 0 0 0 black
 
 .uncool-temp
   color: transparent

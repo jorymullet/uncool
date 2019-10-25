@@ -2,6 +2,22 @@
 import * as firebase from 'firebase'
 export default {
   name: 'UncoolAdmin',
+  watch: {
+    html (newHtml) {
+      if (!newHtml || this.isSpaces(newHtml)) {
+        this.options.onSave('(no content)')
+      } else {
+        this.options.onSave(newHtml)
+      }
+    },
+    seeAdmin (canSeeAdmin) {
+      if (canSeeAdmin && this.$refs.editTextEle) {
+        this.$nextTick(() => {
+          this.$refs.editTextEle.focus()
+        })
+      }
+    },
+  },
   data () {
     return {
       seeAdmin: false,
@@ -44,6 +60,9 @@ export default {
     },
   },
   methods: {
+    isSpaces (str) {
+      return /^\s+$/.test(str)
+    },
     readyListeners () {
       this.$proOn('showUncoolAdmin', options => {
         this.seeAdmin = true
@@ -54,7 +73,7 @@ export default {
         }
       })
       this.$proOn('hideUncoolAdmin', _ => {
-        this.seeAdmin = false
+        this.close()
       })
       this.$forceUpdate()
     },
@@ -86,13 +105,13 @@ export default {
         return
       }
 
-      this.seeAdmin = false
+      this.close()
       this.state = 'user'
       location.reload()
     },
     onLogout () {
       firebase.auth().signOut()
-      this.seeAdmin = false
+      this.close()
       location.reload()
     },
     changeImage () {
@@ -136,9 +155,15 @@ export default {
       this.options.onSave(downloadUrl)
       
       setTimeout(() => {
-        this.seeAdmin = false
+        this.close()
         this.state = 'user'
       }, 1000)
+    },
+    close () {
+      this.seeAdmin = false
+      if (this.options.mode === 'edit-text') {
+        this.options.onSave(this.options.current)
+      }
     },
   },
   mounted () {
@@ -151,7 +176,7 @@ export default {
   div
     .uncool-admin-main(
       v-if='seeAdmin'
-      @click='() => seeAdmin = false'
+      @click='close'
     )
       .uncool-admin-container
         .stop-click(
@@ -160,14 +185,16 @@ export default {
           .content(
             v-if='options.mode === "edit-text"'
           )
+            .header edit text
             .editor-holder
-              textarea(
+              textarea.edit-text(
                 v-model='html'
                 placeholder='<p>Some HTML action here</p>'
+                ref='editTextEle'
               )
             .action
               .cancel(
-                @click='() => seeAdmin = false'
+                @click='close'
               ) cancel
               .continue(
                 @click='onSave'
@@ -188,7 +215,7 @@ export default {
             .dimensions {{options.dimensions.width}}px x {{options.dimensions.height}}px
             .action
               .cancel(
-                @click='() => seeAdmin = false'
+                @click='close'
               ) cancel
           .content(
             v-if='options.mode === "login" && !isLoggedIn'
@@ -205,7 +232,7 @@ export default {
               )
             .action
               .cancel(
-                @click='() => seeAdmin = false'
+                @click='close'
               ) cancel
               .continue(
                 @click='onLogin'
@@ -216,7 +243,7 @@ export default {
             .header logout of uncool?
             .action
               .cancel(
-                @click='() => seeAdmin = false'
+                @click='close'
               ) cancel
               .continue(
                 @click='onLogout'
@@ -247,6 +274,7 @@ export default {
           margin: 0 0 15px
           font-size: 1.3em
           font-weight: bold
+          text-align: left
         .image-uploader
           display: none
         .upload
@@ -271,14 +299,14 @@ export default {
         .editor-holder
           > textarea
             resize: none
-            width: 100%
+            width: 250px
             min-height: 100px
             font-family: monospace
-            font-size: 1.3em
+            font-size: 1em
             padding: 10px
             box-sizing: border-box
-            border: none
-            border-bottom: thin solid black
+            // background: grey
+            border: thin solid black
             &:focus
               outline: none
         .action

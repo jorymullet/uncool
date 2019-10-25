@@ -1,10 +1,12 @@
 import Vue from 'vue'
 import * as firebase from 'firebase'
+import placeholderUrl from './image-placeholder.jpg'
 const eb = new Vue()
 const V_IDS = new Set()
 const UNCOOL_IDS = new Set()
 const TO_DO_LIST = {}
 let IS_AUTHORIZED = null
+
 
 let UNCOOL_REF
 let that
@@ -75,8 +77,13 @@ const handleEditText = async (el, uncoolId) => {
     el.innerHTML = previousHTML
     return 
   }
-
-  el.innerHTML = uncoolHtml.html
+  
+  const allSpacesRegex = /^\s+$/
+  if (IS_AUTHORIZED && (!uncoolHtml.html || allSpacesRegex.test(uncoolHtml.html))) {
+    el.innerHTML = '(no content)'
+  } else {
+    el.innerHTML = uncoolHtml.html
+  }
 }
 
 /**
@@ -84,7 +91,7 @@ const handleEditText = async (el, uncoolId) => {
  */
 
 const handleEditImage = async (el, uncoolId) => {
-  el.style.backgroundImage = `url('https://wolper.com.au/wp-content/uploads/2017/10/image-placeholder.jpg')`
+  el.style.backgroundImage = `url('${placeholderUrl}')`
   el.style.backgroundPosition = 'center center'
   el.style.backgroundSize = 'cover'
 
@@ -100,10 +107,18 @@ const handleEditImage = async (el, uncoolId) => {
  * Handles whether user is authorized and styles Uncool elements accordingly
  */
 
+const modeToClass = (mode) => {
+  return {
+    'edit-text': 'uncool-ele-text',
+    'edit-image': 'uncool-ele-image',
+  }[mode]
+}
+
 const determineEditableStyling = async (el, vnode, editMode, uncoolId) => {
   if (!IS_AUTHORIZED) return
 
   el.classList.add('uncool-ele') //marks the elements as editable
+  el.classList.add(modeToClass(editMode)) //distinguishes between element types
 
   el.addEventListener('click', (event) => {
     event.preventDefault()
@@ -116,13 +131,15 @@ const determineEditableStyling = async (el, vnode, editMode, uncoolId) => {
     let editTypeOptions
 
     if (editMode === 'edit-text') {
+      el.classList.add('uncool-ele-text')
       editTypeOptions = {
         onSave: (newHtml) => {
-          el.innerHTML = newHtml
+          el.innerHTML = newHtml || '(no content)'
         },
         current: replaceSpecialHTMLChars(el.innerHTML),
       }
     } else if (editMode === 'edit-image') {
+      el.classList.add('uncool-ele-image')
       editTypeOptions = {
         dimensions: {
           height: el.offsetHeight,
@@ -230,8 +247,8 @@ export default {
 
     Vue.directive('uncool', {
       bind: (el, binding, vnode) => {
-        const vId = Object.keys(el.dataset)[0]
-        TO_DO_LIST[vId] = {el, binding, vnode}
+        const uncoolId = verifyUncoolId(el, binding)
+        TO_DO_LIST[uncoolId] = {el, binding, vnode}
         uncoolCycle(el, binding, vnode)
       },
     })
