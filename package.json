@@ -1,6 +1,6 @@
 {
   "name": "uncool",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "src/index.js",
   "description": "Vue.js plugin that allows page elements to be easily mutable using Firebase.",
   "repository": "jorymullet/uncool",
