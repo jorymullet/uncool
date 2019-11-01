@@ -20,6 +20,7 @@ export default {
   },
   data () {
     return {
+      firebase,
       seeAdmin: false,
       html: '',
       options: {},
@@ -27,7 +28,8 @@ export default {
       form: {
         email: '',
         password: '',
-      }
+      },
+      isEmittedUser: false,
     }
   },
   computed: {
@@ -56,7 +58,10 @@ export default {
       }[this.state]
     },
     isLoggedIn () {
-      return firebase.auth().currentUser
+      return firebase.auth().currentUser || this.isEmittedUser
+    },
+    isEditUrl () {
+      return this.$route.name === 'UncoolAdmin'
     },
   },
   methods: {
@@ -74,6 +79,9 @@ export default {
       })
       this.$proOn('hideUncoolAdmin', _ => {
         this.close()
+      })
+      this.$proOn('uncoolAuthChange', isAuthorizedUser => {
+        this.isEmittedUser = isAuthorizedUser
       })
       this.$forceUpdate()
     },
@@ -105,14 +113,15 @@ export default {
         return
       }
 
-      this.close()
       this.state = 'user'
-      location.reload()
+      this.close()
     },
     onLogout () {
       firebase.auth().signOut()
       this.close()
-      location.reload()
+      if (!this.isEditUrl) {
+        location.reload()
+      }
     },
     changeImage () {
       this.$refs.imageUpload.click()
@@ -160,14 +169,26 @@ export default {
       }, 1000)
     },
     close () {
+      if (this.isEditUrl) {
+        return this.$router.go(-1)
+      }
       this.seeAdmin = false
       if (this.options.mode === 'edit-text') {
         this.options.onSave(this.options.current)
       }
     },
+    readyEditUrl () {
+      this.seeAdmin = true
+      this.options = {
+        mode: 'login',
+      }
+    },
   },
   mounted () {
     this.readyListeners()
+    if (this.isEditUrl) {
+      this.readyEditUrl()
+    }
   },
 }
 </script>

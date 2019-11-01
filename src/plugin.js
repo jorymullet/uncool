@@ -22,6 +22,7 @@ const startAuthListener = async () => {
   firebase.auth().onAuthStateChanged(async user => {
     if (user) {
       IS_AUTHORIZED = (await firebase.firestore().collection('uncool_users').doc(user.uid).get()).data()
+      that.$proEmit('uncoolAuthChange', IS_AUTHORIZED)
       return iterateOverToDoList()
     }
     IS_AUTHORIZED = false
