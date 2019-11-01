@@ -37,5 +37,9 @@
     "parserOptions": {
       "parser": "babel-eslint"
     }
+  },
+  "dependencies": {
+    "save": "^2.4.0",
+    "vue2-editor": "^2.10.2"
   }
 }
