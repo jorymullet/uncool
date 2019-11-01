@@ -1,7 +1,11 @@
 <script>
 import * as firebase from 'firebase'
+import { VueEditor } from "vue2-editor"
 export default {
   name: 'UncoolAdmin',
+  components: {
+    'vue-editor': VueEditor,
+  },
   watch: {
     html (newHtml) {
       if (!newHtml || this.isSpaces(newHtml)) {
@@ -30,6 +34,29 @@ export default {
         password: '',
       },
       isEmittedUser: false,
+      editorToolbar: [[{
+        header: [false, 1, 2, 3, 4, 5, 6]
+      }], ["bold", "italic", "underline", "strike"], // toggled buttons
+      [{
+        align: ""
+      }, {
+        align: "center"
+      }, {
+        align: "right"
+      }, {
+        align: "justify"
+      }], 
+      [{
+        list: "ordered"
+      }, {
+        list: "bullet"
+      }],
+      [
+        { color: [] },
+        //{ background: []}
+      ], // dropdown with defaults from theme
+      ["link",], ["clean"] // remove formatting button
+      ],
     }
   },
   computed: {
@@ -85,6 +112,13 @@ export default {
       })
       this.$forceUpdate()
     },
+    onSuccessfulSave () {
+      this.options.mode = 'successful-save'
+      setTimeout(() => {
+        this.close()
+        this.state = 'user'
+      }, 2000)
+    },
     async onSave () {
       if (this.state !== 'user') return
 
@@ -100,8 +134,7 @@ export default {
       }
 
       this.options.onSave(this.html)
-      this.seeAdmin = false
-      this.state = 'user'
+      this.onSuccessfulSave()
     },
     async onLogin () {
       this.state = 'system'
@@ -162,11 +195,8 @@ export default {
 
       this.state = 'success'
       this.options.onSave(downloadUrl)
-      
-      setTimeout(() => {
-        this.close()
-        this.state = 'user'
-      }, 1000)
+
+      this.onSuccessfulSave()
     },
     close () {
       if (this.isEditUrl) {
@@ -194,7 +224,11 @@ export default {
 </script>
 
 <template lang="pug">
-  div
+  div#main
+    .uncool-logout-button(
+      v-if='isLoggedIn && !isEditUrl'
+      @click='onLogout'
+    ) LOGOUT
     .uncool-admin-main(
       v-if='seeAdmin'
       @click='close'
@@ -203,16 +237,27 @@ export default {
         .stop-click(
           @click.stop=''
         )
+          .content.successful-save(
+            v-if='options.mode === "successful-save"'
+          )
+            .header saved successfully!
           .content(
             v-if='options.mode === "edit-text"'
           )
             .header edit text
             .editor-holder
-              textarea.edit-text(
+              vue-editor(
+                v-model='html'
+                :editor-toolbar='editorToolbar'
+                )
+              //vue-editor(
+                v-model='html'
+                )
+              //textarea.edit-text(
                 v-model='html'
                 placeholder='<p>Some HTML action here</p>'
                 ref='editTextEle'
-              )
+                )
             .action
               .cancel(
                 @click='close'
@@ -272,81 +317,95 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-  .uncool-admin-main
+  div#main
     font-family: monospace
-    position: fixed
-    top: 0
-    z-index: 990
-    width: 100vw
-    height: 100vh
-    .uncool-admin-container
-      width: 100%
-      height: 100%
-      background-color: rgba(256, 256, 256, .5)
-      display: grid
-      align-items: center
-      justify-items: center
-      .content
-        max-width: 450px
-        padding: 40px 50px 20px
-        background-color: white
-        border: black thin solid
-        .header
-          margin: 0 0 15px
-          font-size: 1.3em
-          font-weight: bold
-          text-align: left
-        .image-uploader
-          display: none
-        .upload
-          padding: 20px
-          border: thin dashed black
-          text-align: center
-          cursor: pointer
-        .dimensions
-          text-align: center
-          padding: 5px 0
-        .login-form
-          > input
-            font-family: monospace
-            border: none
-            border-bottom: thin black solid
-            display: block
-            margin: 15px 0
-            font-size: 1.2em
-            width: 100%
-            &:focus
-              outline: none
-        .editor-holder
-          > textarea
-            resize: none
-            width: 250px
-            min-height: 100px
-            font-family: monospace
-            font-size: 1em
-            padding: 10px
-            box-sizing: border-box
-            // background: grey
-            border: thin solid black
-            &:focus
-              outline: none
-        .action
-          display: grid
-          grid-template-columns: auto min-content
-          justify-items: end
-          padding: 15px 0
-          > *
-            border: black thin solid
-            padding: 5px 15px
-            cursor: pointer
-          .cancel
+    .uncool-logout-button
+      position: fixed
+      bottom: 10px
+      right: 20px
+      background-color: black
+      color: white
+      padding: 5px 30px
+      cursor: pointer
+      font-weight: bold
+      z-index: 989
+    .uncool-admin-main
+      position: fixed
+      top: 0
+      z-index: 990
+      width: 100vw
+      height: 100vh
+      .uncool-admin-container
+        width: 100%
+        height: 100%
+        background-color: rgba(256, 256, 256, .5)
+        display: grid
+        align-items: center
+        justify-items: center
+        .content
+          max-width: 450px
+          padding: 40px 50px 20px
+          background-color: white
+          border: black thin solid
+          &.successful-save
+            background-color: black
             color: white
-            background-color: #666
-            &:hover
-              background-color: black
-          .continue
-            margin-left: 15px
-            &:hover
-              background-color: black
+          .header
+            margin: 0 0 15px
+            font-size: 1.3em
+            font-weight: bold
+            text-align: left
+          .image-uploader
+            display: none
+          .upload
+            padding: 20px
+            border: thin dashed black
+            text-align: center
+            cursor: pointer
+          .dimensions
+            text-align: center
+            padding: 5px 0
+          .login-form
+            > input
+              font-family: monospace
+              border: none
+              border-bottom: thin black solid
+              display: block
+              margin: 15px 0
+              font-size: 1.2em
+              width: 100%
+              &:focus
+                outline: none
+          .editor-holder
+            > textarea
+              resize: none
+              width: 250px
+              min-height: 100px
+              font-family: monospace
+              font-size: 1em
+              padding: 10px
+              box-sizing: border-box
+              // background: grey
+              border: thin solid black
+              &:focus
+                outline: none
+          .action
+            display: grid
+            grid-template-columns: auto min-content
+            justify-items: end
+            padding: 15px 0
+            > *
+              border: black thin solid
+              padding: 5px 15px
+              cursor: pointer
+            .cancel
               color: white
+              background-color: #666
+              &:hover
+                background-color: black
+            .continue
+              margin-left: 15px
+              &:hover
+                background-color: black
+                color: white
 </style>
