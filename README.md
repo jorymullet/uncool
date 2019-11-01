@@ -48,6 +48,18 @@ export default {
   </div>
 </template>
 ```
+If you would like to access the login page for uncool via url, in your `router` file, include the following route, using whatever path works for your site (here, we used `/edit`):
+```
+const routes = [
+  ...
+  {
+    path: '/edit', // this can be whatever you need it to be
+    name: 'UncoolAdmin', // this needs to be 'UncoolAdmin'
+  },
+  ...
+]
+```
+
 In `firestore.rules`, include the following rules:
 ```
 rules_version = '2';
@@ -113,7 +125,7 @@ Edit image example (be sure to include `image` on your directive):
 ## How to use (as an Uncool editor):
 To acquire your Uncool editor authorization: 
   - Sign in:
-    - press `Cmd + u`.
+    - press `Cmd + u` (or visit your uncool admin url).
     - enter username and password.
     - press `login`
   - Edit element:
@@ -124,7 +136,7 @@ To acquire your Uncool editor authorization:
     - edit innerHTML (or choose new img) of element and click `save`
     - changes should propogate
   - Sign out (if you would like):
-    - press `Cmd + u`.
+    - press `Cmd + u` (or visit your uncool admin url).
     - press `logout`
     
 
