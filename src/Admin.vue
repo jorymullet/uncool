@@ -34,9 +34,11 @@ export default {
         password: '',
       },
       isEmittedUser: false,
-      editorToolbar: [[{
+      editorToolbar: [
+      /*[{
         header: [false, 1, 2, 3, 4, 5, 6]
-      }], ["bold", "italic", "underline", "strike"], // toggled buttons
+      }], */
+      ["bold", "italic", "underline", "strike"], // toggled buttons
       [{
         align: ""
       }, {
@@ -228,12 +230,14 @@ export default {
     .uncool-logout-button(
       v-if='isLoggedIn && !isEditUrl'
       @click='onLogout'
-    ) LOGOUT
+    ) logout
     .uncool-admin-main(
       v-if='seeAdmin'
       @click='close'
     )
-      .uncool-admin-container
+      .uncool-admin-container(
+        :class='isEditUrl ? "on-url" : "on-screen"'
+      )
         .stop-click(
           @click.stop=''
         )
@@ -286,7 +290,7 @@ export default {
           .content(
             v-if='options.mode === "login" && !isLoggedIn'
           )
-            .header login to uncool
+            .header if you login, you will be able to edit this site
             .login-form
               input(
                 v-model='form.email'
@@ -331,6 +335,7 @@ export default {
       z-index: 989
     .uncool-admin-main
       position: fixed
+      left: 0
       top: 0
       z-index: 990
       width: 100vw
@@ -338,12 +343,17 @@ export default {
       .uncool-admin-container
         width: 100%
         height: 100%
-        background-color: rgba(256, 256, 256, .5)
         display: grid
         align-items: center
         justify-items: center
+        &.on-screen
+          background-color: rgba(256, 256, 256, .5)
+        &.on-url
+          background-color: black
         .content
-          max-width: 450px
+          max-width: 520px
+          max-height: 600px
+          overflow: scroll
           padding: 40px 50px 20px
           background-color: white
           border: black thin solid
@@ -391,7 +401,7 @@ export default {
                 outline: none
           .action
             display: grid
-            grid-template-columns: auto min-content
+            grid-template-columns: auto 150px
             justify-items: end
             padding: 15px 0
             > *
