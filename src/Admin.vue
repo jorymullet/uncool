@@ -320,6 +320,12 @@ export default {
               ) logout
 </template>
 
+<style lang="sass">
+  #quill-container
+    max-height: 300px
+    overflow: scroll
+</style>
+
 <style lang="sass" scoped>
   div#main
     font-family: monospace
@@ -352,7 +358,7 @@ export default {
           background-color: black
         .content
           max-width: 520px
-          max-height: 600px
+          max-height: 100vh
           overflow: scroll
           padding: 40px 50px 20px
           background-color: white
