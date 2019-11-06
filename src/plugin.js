@@ -196,10 +196,10 @@ const checkKeys = () => {
   const correctNumberOfEngagedKeys = Object.keys(ENGAGED_KEYS).length === 2
   if (!correctNumberOfEngagedKeys) return
 
-  const correctKeys = ['MetaLeft', 'KeyU'].every(code => ENGAGED_KEYS[code])
+  const correctKeys = [['MetaLeft', 'KeyU'],['AltLeft', 'KeyU']].find(arr => arr.every(code => ENGAGED_KEYS[code]))
   if (!correctKeys) return
 
-  const correctOrder = ENGAGED_KEYS['MetaLeft'] < ENGAGED_KEYS['KeyU']
+  const correctOrder = ENGAGED_KEYS[correctKeys[0]] < ENGAGED_KEYS[correctKeys[1]]
   if (!correctOrder) return
   
   that.$proEmit('showUncoolAdmin', {
