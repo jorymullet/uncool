@@ -227,7 +227,7 @@ export default {
 
 <template lang="pug">
   div#main
-    .uncool-logout-button(
+    .uc-btn.cancel.uncool-logout-button(
       v-if='isLoggedIn && !isEditUrl'
       @click='onLogout'
     ) logout
@@ -254,19 +254,11 @@ export default {
                 v-model='html'
                 :editor-toolbar='editorToolbar'
                 )
-              //vue-editor(
-                v-model='html'
-                )
-              //textarea.edit-text(
-                v-model='html'
-                placeholder='<p>Some HTML action here</p>'
-                ref='editTextEle'
-                )
             .action
-              .cancel(
+              .uc-btn.cancel(
                 @click='close'
               ) cancel
-              .continue(
+              .uc-btn.continue(
                 @click='onSave'
               ) {{saveCopy}}
           .content(
@@ -284,7 +276,7 @@ export default {
             ) {{uploadCopy}}
             .dimensions {{options.dimensions.width}}px x {{options.dimensions.height}}px
             .action
-              .cancel(
+              .uc-btn.cancel(
                 @click='close'
               ) cancel
           .content(
@@ -295,16 +287,18 @@ export default {
               input(
                 v-model='form.email'
                 placeholder='email'
+                type='email'
               )
               input(
                 v-model='form.password'
                 placeholder='password'
+                type='password'
               )
             .action
-              .cancel(
+              .uc-btn.cancel(
                 @click='close'
               ) cancel
-              .continue(
+              .uc-btn.continue(
                 @click='onLogin'
               ) {{loginCopy}}
           .content(
@@ -312,10 +306,10 @@ export default {
           )
             .header logout of uncool?
             .action
-              .cancel(
+              .uc-btn.cancel(
                 @click='close'
               ) cancel
-              .continue(
+              .uc-btn.continue(
                 @click='onLogout'
               ) logout
 </template>
@@ -333,11 +327,6 @@ export default {
       position: fixed
       bottom: 10px
       right: 20px
-      background-color: black
-      color: white
-      padding: 5px 30px
-      cursor: pointer
-      font-weight: bold
       z-index: 989
     .uncool-admin-main
       position: fixed
@@ -358,6 +347,7 @@ export default {
           background-color: black
         .content
           max-width: 520px
+          min-width: 200px
           max-height: 100vh
           overflow: scroll
           padding: 40px 50px 20px
@@ -407,21 +397,7 @@ export default {
                 outline: none
           .action
             display: grid
-            grid-template-columns: auto 150px
+            grid-template-columns: auto max-content
             justify-items: end
             padding: 15px 0
-            > *
-              border: black thin solid
-              padding: 5px 15px
-              cursor: pointer
-            .cancel
-              color: white
-              background-color: #666
-              &:hover
-                background-color: black
-            .continue
-              margin-left: 15px
-              &:hover
-                background-color: black
-                color: white
 </style>
