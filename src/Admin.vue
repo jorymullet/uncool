@@ -359,7 +359,6 @@ export default {
           .header
             margin: 0 0 15px
             font-size: 1.3em
-            font-weight: bold
             text-align: left
           .image-uploader
             display: none
