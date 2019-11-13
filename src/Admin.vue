@@ -282,7 +282,7 @@ export default {
           .content(
             v-if='options.mode === "login" && !isLoggedIn'
           )
-            .header if you login, you will be able to edit this site
+            .header login to edit this site
             .login-form
               input(
                 v-model='form.email'
